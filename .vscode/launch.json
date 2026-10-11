@@ -1,0 +1,12 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Run Main (Real Estate Management)",
+            "request": "launch",
+            "mainClass": "Main",
+            "projectName": "real-estate-mandate-management"
+        }
+    ]
+}

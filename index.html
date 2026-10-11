@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real Estate Agent Mandate Management System</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Enterprise Branding Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="logo-icon">🏢</div>
+      <div>
+        <h1 class="header-title">Real Estate Agent Mandate Management System</h1>
+        <div class="header-subtitle">Enterprise Desktop & Web Portal</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="db-status-badge" id="dbStatusBadge">
+        <span class="status-dot"></span>
+        <span id="dbStatusText">Database: Active (MySQL Storage)</span>
+      </div>
+      <button class="btn btn-sm btn-outline" id="btnExportAll">Export Data (JSON)</button>
+      <button class="btn btn-sm btn-outline" id="btnResetData">Reset Demo Data</button>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="nav-tabs">
+    <button class="tab-btn active" data-tab="dashboard">
+      <span class="tab-icon">📊</span> Dashboard
+    </button>
+    <button class="tab-btn" data-tab="agents">
+      <span class="tab-icon">👤</span> Agents
+    </button>
+    <button class="tab-btn" data-tab="agencies">
+      <span class="tab-icon">🏢</span> Agencies
+    </button>
+    <button class="tab-btn" data-tab="areas">
+      <span class="tab-icon">📍</span> Geographical Areas
+    </button>
+    <button class="tab-btn" data-tab="mandates">
+      <span class="tab-icon">📜</span> Mandates
+    </button>
+    <button class="tab-btn" data-tab="reports">
+      <span class="tab-icon">📈</span> Reports
+    </button>
+  </nav>
+
+  <!-- Main Container for View Panels -->
+  <main class="main-content">
+
+    <!-- 1. DASHBOARD TAB -->
+    <section class="tab-pane active" id="tab-dashboard">
+      <div class="pane-header">
+        <div>
+          <h2>System Overview & KPI Statistics</h2>
+          <p class="pane-subtitle">Live real-time aggregation across Agents, Agencies, Areas, and Mandates</p>
+        </div>
+        <button class="btn btn-primary" id="btnRefreshDashboard">↻ Refresh Statistics</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card border-blue">
+          <div class="stat-card-title">Total Agents</div>
+          <div class="stat-card-value text-blue" id="dashTotalAgents">0</div>
+          <div class="stat-card-sub">Registered Sales Agents</div>
+        </div>
+        <div class="stat-card border-darkblue">
+          <div class="stat-card-title">Total Agencies</div>
+          <div class="stat-card-value text-darkblue" id="dashTotalAgencies">0</div>
+          <div class="stat-card-sub">Independent & Franchise</div>
+        </div>
+        <div class="stat-card border-purple">
+          <div class="stat-card-title">Geographical Areas</div>
+          <div class="stat-card-value text-purple" id="dashTotalAreas">0</div>
+          <div class="stat-card-sub">Coverage Zones</div>
+        </div>
+        <div class="stat-card border-orange">
+          <div class="stat-card-title">Total Mandates</div>
+          <div class="stat-card-value text-orange" id="dashTotalMandates">0</div>
+          <div class="stat-card-sub">All Issued Mandates</div>
+        </div>
+        <div class="stat-card border-green">
+          <div class="stat-card-title">Active Mandates</div>
+          <div class="stat-card-value text-green" id="dashActiveMandates">0</div>
+          <div class="stat-card-sub">Currently Valid & Ongoing</div>
+        </div>
+        <div class="stat-card border-teal">
+          <div class="stat-card-title">Agents With Mandates</div>
+          <div class="stat-card-value text-teal" id="dashAgentsWithMandates">0</div>
+          <div class="stat-card-sub">Handling ≥ 1 Mandate</div>
+        </div>
+        <div class="stat-card border-red">
+          <div class="stat-card-title">Top Performing Agent</div>
+          <div class="stat-card-value text-red truncate" id="dashMaxAgentName" style="font-size: 1.5rem;">None</div>
+          <div class="stat-card-sub" id="dashMaxAgentCount">0 Mandate(s)</div>
+        </div>
+        <div class="stat-card border-blue">
+          <div class="stat-card-title">Agency Types Breakdown</div>
+          <div class="stat-card-value text-blue" id="dashAgencyBreakdown" style="font-size: 1.3rem;">0 Ind / 0 Fran</div>
+          <div class="stat-card-sub">Polymorphic Agency Distribution</div>
+        </div>
+        <div class="stat-card border-green">
+          <div class="stat-card-title">System Status</div>
+          <div class="stat-card-value text-green" style="font-size: 1.4rem;">Online & Ready</div>
+          <div class="stat-card-sub">GitHub & Vercel Compatible</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. AGENTS TAB -->
+    <section class="tab-pane" id="tab-agents">
+      <div class="module-layout">
+        <!-- Form Panel -->
+        <div class="form-card">
+          <h3 class="form-title">Agent Registration</h3>
+          <form id="agentForm">
+            <div class="form-group">
+              <label for="agentId">Agent ID (Auto / Search):</label>
+              <input type="number" id="agentId" placeholder="Leave empty for new agent">
+            </div>
+            <div class="form-group">
+              <label for="agentName">Agent Name: *</label>
+              <input type="text" id="agentName" placeholder="e.g. Vijay Kumar" required>
+            </div>
+            <div class="form-group">
+              <label for="agentPhone">Phone: * (≥10 digits)</label>
+              <input type="tel" id="agentPhone" placeholder="e.g. 9876543210" required>
+            </div>
+            <div class="form-group">
+              <label for="agentEmail">Email: *</label>
+              <input type="email" id="agentEmail" placeholder="e.g. vijay@realty.com" required>
+            </div>
+            <div class="form-group">
+              <label for="agentAgencyId">Agency ID: *</label>
+              <select id="agentAgencyId" required>
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+            <div class="btn-grid">
+              <button type="button" class="btn btn-accent" id="btnAddAgent">Add Agent</button>
+              <button type="button" class="btn btn-primary" id="btnUpdateAgent">Update Agent</button>
+              <button type="button" class="btn btn-danger" id="btnDeleteAgent">Delete Agent</button>
+              <button type="button" class="btn btn-info" id="btnSearchAgent">Search Agent</button>
+              <button type="button" class="btn btn-secondary" id="btnClearAgent">Clear Form</button>
+              <button type="button" class="btn btn-outline" id="btnRefreshAgents">Refresh</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Table Panel -->
+        <div class="table-card">
+          <div class="table-header-bar">
+            <h3>Registered Agents Directory</h3>
+            <span class="badge" id="agentCountBadge">0 agents</span>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" id="agentTable">
+              <thead>
+                <tr>
+                  <th>Agent ID</th>
+                  <th>Agent Name</th>
+                  <th>Phone</th>
+                  <th>Email</th>
+                  <th>Agency ID</th>
+                  <th>Agency Name</th>
+                </tr>
+              </thead>
+              <tbody id="agentTableBody">
+                <!-- Data rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. AGENCIES TAB -->
+    <section class="tab-pane" id="tab-agencies">
+      <div class="module-layout">
+        <div class="form-card">
+          <h3 class="form-title">Agency Registration</h3>
+          <form id="agencyForm">
+            <div class="form-group">
+              <label for="agencyId">Agency ID (Auto / Search):</label>
+              <input type="number" id="agencyId" placeholder="Leave empty for new agency">
+            </div>
+            <div class="form-group">
+              <label for="agencyName">Agency Name: *</label>
+              <input type="text" id="agencyName" placeholder="e.g. Prime Realty Network" required>
+            </div>
+            <div class="form-group">
+              <label for="agencyType">Agency Type: * (Polymorphism)</label>
+              <select id="agencyType" required>
+                <option value="Independent">Independent Agency</option>
+                <option value="Franchise">Franchise Agency</option>
+              </select>
+            </div>
+            <div class="form-group" id="subclassParamGroup">
+              <label for="agencySubParam" id="lblSubParam">Owner Name (for Independent):</label>
+              <input type="text" id="agencySubParam" placeholder="e.g. John Doe">
+            </div>
+            <div class="form-group">
+              <label for="agencyAddress">Address:</label>
+              <input type="text" id="agencyAddress" placeholder="e.g. 101 Corporate Blvd">
+            </div>
+            <div class="form-group">
+              <label for="agencyPhone">Phone:</label>
+              <input type="tel" id="agencyPhone" placeholder="e.g. 9876543210">
+            </div>
+            <div class="btn-grid">
+              <button type="button" class="btn btn-accent" id="btnAddAgency">Add Agency</button>
+              <button type="button" class="btn btn-primary" id="btnUpdateAgency">Update Agency</button>
+              <button type="button" class="btn btn-danger" id="btnDeleteAgency">Delete Agency</button>
+              <button type="button" class="btn btn-info" id="btnSearchAgency">Search Agency</button>
+              <button type="button" class="btn btn-secondary" id="btnClearAgency">Clear Form</button>
+              <button type="button" class="btn btn-outline" id="btnRefreshAgencies">Refresh</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="table-card">
+          <div class="table-header-bar">
+            <h3>Registered Agencies Directory</h3>
+            <span class="badge" id="agencyCountBadge">0 agencies</span>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" id="agencyTable">
+              <thead>
+                <tr>
+                  <th>Agency ID</th>
+                  <th>Agency Name</th>
+                  <th>Type</th>
+                  <th>Polymorphic Description</th>
+                  <th>Address</th>
+                  <th>Phone</th>
+                </tr>
+              </thead>
+              <tbody id="agencyTableBody">
+                <!-- Data rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. GEOGRAPHICAL AREAS TAB -->
+    <section class="tab-pane" id="tab-areas">
+      <div class="module-layout">
+        <div class="form-card">
+          <h3 class="form-title">Geographical Area Registration</h3>
+          <form id="areaForm">
+            <div class="form-group">
+              <label for="areaId">Area ID (Auto / Search):</label>
+              <input type="number" id="areaId" placeholder="Leave empty for new area">
+            </div>
+            <div class="form-group">
+              <label for="areaName">Area Name: *</label>
+              <input type="text" id="areaName" placeholder="e.g. Downtown Metro" required>
+            </div>
+            <div class="form-group">
+              <label for="areaPopulation">Population: * (Positive Number)</label>
+              <input type="number" id="areaPopulation" min="1" placeholder="e.g. 250000" required>
+            </div>
+            <div class="btn-grid">
+              <button type="button" class="btn btn-accent" id="btnAddArea">Add Area</button>
+              <button type="button" class="btn btn-primary" id="btnUpdateArea">Update Population</button>
+              <button type="button" class="btn btn-danger" id="btnDeleteArea">Delete Area</button>
+              <button type="button" class="btn btn-info" id="btnSearchArea">Search Area</button>
+              <button type="button" class="btn btn-secondary" id="btnClearArea">Clear Form</button>
+              <button type="button" class="btn btn-outline" id="btnRefreshAreas">Refresh</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="table-card">
+          <div class="table-header-bar">
+            <h3>Geographical Areas Directory</h3>
+            <span class="badge" id="areaCountBadge">0 areas</span>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" id="areaTable">
+              <thead>
+                <tr>
+                  <th>Area ID</th>
+                  <th>Area Name</th>
+                  <th>Population</th>
+                </tr>
+              </thead>
+              <tbody id="areaTableBody">
+                <!-- Data rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. MANDATES TAB -->
+    <section class="tab-pane" id="tab-mandates">
+      <div class="module-layout">
+        <div class="form-card">
+          <h3 class="form-title">Mandate Registration</h3>
+          <form id="mandateForm">
+            <div class="form-group">
+              <label for="mandateId">Mandate ID (Auto / Search):</label>
+              <input type="number" id="mandateId" placeholder="Leave empty for new mandate">
+            </div>
+            <div class="form-group">
+              <label for="mandateAgentId">Agent: *</label>
+              <select id="mandateAgentId" required></select>
+            </div>
+            <div class="form-group">
+              <label for="mandateAgencyId">Agency: *</label>
+              <select id="mandateAgencyId" required></select>
+            </div>
+            <div class="form-group">
+              <label for="mandateAreaId">Geographical Area: *</label>
+              <select id="mandateAreaId" required></select>
+            </div>
+            <div class="form-group">
+              <label for="mandateStartDate">Start Date: * (YYYY-MM-DD)</label>
+              <input type="date" id="mandateStartDate" required>
+            </div>
+            <div class="form-group">
+              <label for="mandateEndDate">End Date: * (Must be &gt; Start Date)</label>
+              <input type="date" id="mandateEndDate" required>
+            </div>
+            <div class="form-group">
+              <label for="mandateType">Mandate Type: *</label>
+              <select id="mandateType" required>
+                <option value="SALE">SALE</option>
+                <option value="RENT">RENT</option>
+                <option value="PURCHASE">PURCHASE</option>
+                <option value="LEASE">LEASE</option>
+              </select>
+            </div>
+            <div class="btn-grid">
+              <button type="button" class="btn btn-accent" id="btnAddMandate">Add Mandate</button>
+              <button type="button" class="btn btn-primary" id="btnUpdateMandate">Update Mandate</button>
+              <button type="button" class="btn btn-danger" id="btnDeleteMandate">Delete Mandate</button>
+              <button type="button" class="btn btn-info" id="btnSearchMandate">Search Mandate</button>
+              <button type="button" class="btn btn-secondary" id="btnClearMandate">Clear Form</button>
+              <button type="button" class="btn btn-outline" id="btnRefreshMandates">Refresh</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="table-card">
+          <div class="table-header-bar">
+            <h3>Registered Mandates Directory</h3>
+            <span class="badge" id="mandateCountBadge">0 mandates</span>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" id="mandateTable">
+              <thead>
+                <tr>
+                  <th>Mandate ID</th>
+                  <th>Agent</th>
+                  <th>Agency</th>
+                  <th>Area</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="mandateTableBody">
+                <!-- Data rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. REPORTS TAB -->
+    <section class="tab-pane" id="tab-reports">
+      <div class="reports-control-card">
+        <div class="report-select-group">
+          <label for="reportSelector">Select Report to Generate (15 Analytical Reports):</label>
+          <select id="reportSelector">
+            <option value="1">1. Display all agents</option>
+            <option value="2">2. Display all agencies with agency type</option>
+            <option value="3">3. Display all geographical areas</option>
+            <option value="4">4. Display active mandates on a given date</option>
+            <option value="5">5. Calculate total number of agents</option>
+            <option value="6">6. Calculate total number of agencies</option>
+            <option value="7">7. Calculate total number of mandates</option>
+            <option value="8">8. Calculate number of mandates handled by each agent</option>
+            <option value="9">9. Display agents with at least one mandate</option>
+            <option value="10">10. Display agencies that have issued mandates</option>
+            <option value="11">11. Find the agent handling the maximum number of mandates</option>
+            <option value="12">12. Display active and expired mandates</option>
+            <option value="13">13. Display mandates grouped by mandate type</option>
+            <option value="14">14. Display mandates grouped by agency</option>
+            <option value="15">15. Display mandates grouped by geographical area</option>
+          </select>
+        </div>
+
+        <div class="report-date-filter" id="reportDateFilter" style="display: none;">
+          <label for="reportDateInput">Select Date to Evaluate:</label>
+          <input type="date" id="reportDateInput">
+        </div>
+
+        <div class="report-actions">
+          <button class="btn btn-primary" id="btnRunReport">Generate Report</button>
+          <button class="btn btn-outline" id="btnExportReport">Export Table to CSV</button>
+        </div>
+      </div>
+
+      <div class="table-card" style="margin-top: 1.5rem;">
+        <div class="table-header-bar">
+          <h3 id="reportTitle">Report Output</h3>
+          <span class="badge" id="reportCountBadge">0 records</span>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table" id="reportTable">
+            <thead id="reportTableHead">
+              <!-- Dynamic columns based on report -->
+            </thead>
+            <tbody id="reportTableBody">
+              <!-- Report results -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal / Dialog for Confirmation / Prompts -->
+  <div class="modal-backdrop" id="modalBackdrop" style="display: none;">
+    <div class="modal-box">
+      <h3 id="modalTitle">Confirmation</h3>
+      <p id="modalMessage">Are you sure you want to proceed?</p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="modalBtnCancel">Cancel</button>
+        <button class="btn btn-danger" id="modalBtnConfirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
